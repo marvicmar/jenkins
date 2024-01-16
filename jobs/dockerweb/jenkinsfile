@@ -12,23 +12,19 @@ pipeline {
     }
     stages {
           stage('stop/rm') {
+          steps {
+              script {
+                  def dockerExist = bat(
+                      returnStatus: true,
+                      script: 'docker ps -q --filter "name=${name_final}"'
+                  )
+                  if (dockerExist == 0) {
+                      bat 'docker stop ${name_final} && docker rm ${name_final}'
+                  }
+              }
+          }
+      }
 
-            when {
-                expression { 
-                    DOCKER_EXIST = sh(returnStdout: true, script: 'echo "$(docker ps -q --filter name=${name_final})"').trim()
-                    return  DOCKER_EXIST != '' 
-                }
-            }
-            steps {
-                script{
-                    sh ''' 
-                         docker stop ${name_final}
-                    '''
-                    }
-                    
-                }                    
-                                  
-            }
            
         stage('build') {
             steps {
